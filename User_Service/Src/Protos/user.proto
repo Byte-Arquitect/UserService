@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "User_Service.Src.Protos";
+
+service UserProto{
+    rpc Register (RegisterUserDto) returns (ResponseRegister);
+}
+
+message RegisterUserDto{
+    string name = 1;
+    string firstlastname = 2;
+    string secondlastname = 3;
+    string rut = 4;
+    string email = 5;
+    int32 careerId = 6;
+    string password = 7;
+    string repeatedPassword = 8;
+}
+
+message ResponseRegister{
+    string message = 1;
+}

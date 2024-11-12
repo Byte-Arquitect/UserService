@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "User_Service.Src.Protos";
+
+
+service Test{
+    rpc SayHello (Request) returns (Response);
+}
+
+
+message Request {
+    string nombre = 1;
+}
+
+message Response{
+    string message = 1;
+}
