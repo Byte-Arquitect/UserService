@@ -9,7 +9,7 @@ using User_Service.Src.Services;
 
 namespace User_Service.Src.Services
 {
-    public class AuthController : UserProto.UserProtoBase
+    public class AuthController : AuthProto.AuthProtoBase
     {
         private readonly ILogger<AuthService> _logger;
         private readonly AuthService _authService;
@@ -23,13 +23,12 @@ namespace User_Service.Src.Services
         
         public override Task<ResponseRegister> Register(RegisterUserDto request, ServerCallContext context){
             
-            // var response = _authService.Register(request,context);
-            // return Task.FromResult(new ResponseRegister
-            // {
-            //     Message = "Register OK, usuario" + userRegister.ToString()
-            // });
+            var response = _authService.Register(request,context);
+            return Task.FromResult(new ResponseRegister
+            {
+                Message = "Register OK, usuario" + response
+            });
 
-            return null;
         }
 
     }

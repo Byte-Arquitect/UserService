@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using User_Service.Src.Models;
 
-public class UserServiceContext : DbContext
+public class DataContext : DbContext
 {
-    public UserServiceContext(DbContextOptions<UserServiceContext> options) : base(options)
+    public DataContext(DbContextOptions<DataContext> options) : base(options)
     {
     }
 
