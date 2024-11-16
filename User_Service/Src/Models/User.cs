@@ -22,8 +22,14 @@ namespace User_Service.Src.Models
 
         [StringLength(250)]
         public string Email { get; set; } = null!;
+
+        [StringLength(250)]
+        public string HashedPassword { get; set; } = null!;
+
         public bool IsEnabled { get; set; } = true;
+        public string CareerName { get; set; } = null!;
         public int CareerId { get; set; }
+        public string RoleName { get; set; } = null!;
         public int RoleId { get; set; }
     }
 }

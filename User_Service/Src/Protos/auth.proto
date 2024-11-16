@@ -17,7 +17,18 @@ message RegisterUserDto{
     string repeatedPassword = 8;
 }
 
+message UserRegisterResponse{
+    int32 id = 1;
+    string Name = 2;
+    string FirstLastName = 3;
+    string SecondLastName = 4;
+    string RUT = 5;
+    string Email = 6;
+    string RoleName = 7;
+    string CareerName = 8;
+}
+
 message ResponseRegister{
-    string name = 1;
+    UserRegisterResponse user = 1;
     string token = 2;
 }

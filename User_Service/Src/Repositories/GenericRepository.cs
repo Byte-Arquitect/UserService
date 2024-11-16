@@ -19,7 +19,14 @@ namespace User_Service.Src.Repositories
         {
             this.context = context;
             this.dbSet = context.Set<TEntity>();
+            InitializeDatabase();
         }
+
+       public void InitializeDatabase()
+        {
+            context.Database.Migrate(); // Use migrations to apply schema changes
+        }
+
 
         public virtual async Task<List<TEntity>> Get(
             Expression<Func<TEntity, bool>>? filter = null,
@@ -80,7 +87,7 @@ namespace User_Service.Src.Repositories
                 if (baseModel.DeletedAt is not null)
                     throw new EntityDeletedException($"Entity: {entityToDelete} cannot be deleted");
 
-                baseModel.DeletedAt = DateTime.Now;
+                baseModel.DeletedAt = DateTime.UtcNow; // Use UTC
             }
 
             dbSet.Attach(entityToDelete);
@@ -124,7 +131,7 @@ namespace User_Service.Src.Repositories
         {
             if (entityToUpdate is BaseModel baseModel)
             {
-                baseModel.UpdatedAt = DateTime.Now;
+                baseModel.UpdatedAt = DateTime.UtcNow; // Use UTC
                 baseModel.Version++;
             }
 

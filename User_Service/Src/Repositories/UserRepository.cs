@@ -20,9 +20,8 @@ namespace User_Service.Src.Repositories
         {
             var user = await dbSet
                         .Where(softDeleteFilter)
-                        .Include(x => x.RoleId)
-                        .Include(x => x.CareerId)
                         .FirstOrDefaultAsync(x => x.Email == email);
+            
             return user;
         }
 
@@ -30,8 +29,6 @@ namespace User_Service.Src.Repositories
         {
             var user = await dbSet
                         .Where(softDeleteFilter)
-                        .Include(x => x.RoleId)
-                        .Include(x => x.CareerId)
                         .FirstOrDefaultAsync(x => x.RUT == rut);
             return user;
         }
