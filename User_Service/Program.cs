@@ -7,42 +7,48 @@ using User_Service.Src.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuración de AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
+// Repositorios y servicios
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IMapperService, MapperService>();
+builder.Services.AddScoped<AuthService>();
 
-
-// Add services to the container.
-builder.Services.AddControllers();
+// Configuración de DbContext con PostgreSQL
 builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("userDB"));
 });
 
-
-
-builder.Services.AddScoped<AuthService>(); 
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Configuración de gRPC con JSON Transcoding e interceptores
 builder.Services.AddGrpc(options =>
 {
-    options.Interceptors.Add<ExceptionHandlingInterceptor>(); // Registrar el interceptor
-});
+    options.Interceptors.Add<ExceptionHandlingInterceptor>();
+}).AddJsonTranscoding();
 builder.Services.AddGrpcReflection();
+
+// Swagger para documentación (opcional)
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Configurar Swagger
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
+// Mapear servicios gRPC
 app.MapGrpcService<AuthController>();
 app.MapGrpcService<TestService>();
 
-
+// Reflexión de gRPC (solo desarrollo)
 if (app.Environment.IsDevelopment())
 {
     app.MapGrpcReflectionService();
 }
 
-
 app.Run();
-

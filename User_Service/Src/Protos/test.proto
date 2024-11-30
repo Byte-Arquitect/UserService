@@ -1,10 +1,15 @@
 syntax = "proto3";
 
 option csharp_namespace = "User_Service.Src.Protos";
+import "google/api/annotations.proto";
 
 
 service Test{
-    rpc SayHello (Request) returns (Response);
+    rpc SayHello (Request) returns (Response){
+        option (google.api.http) = {
+            get: "/v1/test/{nombre}"
+        };
+    }
 }
 
 

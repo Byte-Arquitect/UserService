@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option csharp_namespace = "User_Service.Src.Protos";
 
+package Auth;
+
 service AuthProto{
     rpc Register (RegisterUserDto) returns (ResponseRegister);
 }
