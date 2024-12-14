@@ -6,5 +6,10 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<UserProgress> UserProgresses { get; set; } = null!;
 
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+    }
+
     
 }

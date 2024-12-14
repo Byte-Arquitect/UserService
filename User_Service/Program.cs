@@ -7,6 +7,7 @@ using User_Service.Src.Repositories;
 using User_Service.Src.Repositories.Interfaces;
 using User_Service.Src.Services;
 using User_Service.Src.Services.Interfaces;
+using User_Service.Src.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +56,12 @@ builder.Services.AddMassTransit(x =>
 
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<DataContext>();
+    context.Database.EnsureCreated();
+}
 
 // Configurar Swagger
 if (app.Environment.IsDevelopment())
@@ -72,5 +79,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapGrpcReflectionService();
 }
+
+AppSeedService.SeedDatabase(app);
 
 app.Run();

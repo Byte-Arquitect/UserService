@@ -14,8 +14,12 @@ namespace User_Service.Src.Repositories
         private readonly Expression<Func<User, bool>> softDeleteFilter = x => x.DeletedAt == null;
         public UserRepository(DataContext context) : base(context)
         {
+            InitializeDatabase();
         }
-
+        public void InitializeDatabase()
+        {
+            context.Database.EnsureCreated();
+        }
         public async Task<User?> GetByEmail(string email)
         {
             var user = await dbSet

@@ -24,7 +24,32 @@ namespace User_Service.Src.Repositories
 
        public void InitializeDatabase()
         {
-            context.Database.Migrate(); // Use migrations to apply schema changes
+            context.Database.EnsureCreated();
+            if (context.Users.Any())
+            {
+                return;   // La base de datos ya está poblada
+            }
+
+            context.Users.AddRange(
+                new User
+                {
+                    Name = "Jane",
+                    FirstLastName = "Doe",
+                    SecondLastName = "Smith",
+                    RUT = "12345678-9",
+                    Email = "jane.doe@example.com",
+                    HashedPassword = "hashed_password_123", // Usa un hash real aquí
+                    IsEnabled = true,
+                    CareerName = "Computer Science",
+                    CareerId = 1,
+                    RoleName = "User",
+                    RoleId = 2,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    Version = 1
+                }
+            );
+            context.SaveChanges();
         }
 
 
