@@ -21,14 +21,22 @@ namespace User_Service.Src.Services
         private readonly IMapperService _mapperService;
 
         private readonly RegisterEvent _registerEvent;
+        private readonly UpdatePasswordEvent _updateEvent;
         
 
-        public AuthService(ILogger<AuthService> logger, IUnitOfWork unitOfWork, IMapperService mapperService, RegisterEvent registerEvent)
+        public AuthService(
+            ILogger<AuthService> logger, 
+            IUnitOfWork unitOfWork, 
+            IMapperService mapperService, 
+            RegisterEvent registerEvent,
+            UpdatePasswordEvent updateEvent
+            )
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _mapperService = mapperService;
             _registerEvent = registerEvent;
+            _updateEvent = updateEvent;
         }
 
         public async Task<ResponseRegister> Register(RegisterUserDto request, ServerCallContext context)
@@ -88,7 +96,9 @@ namespace User_Service.Src.Services
 
             return response;
         }
-        public Task<ResponsePassword> UpdatePassword(newPassword request,ServerCallContext context){
+        public async Task<ResponsePassword> UpdatePassword(newPassword request,ServerCallContext context){
+
+            string id = request.UserId;
 
             var salt = BCrypt.Net.BCrypt.GenerateSalt(12);
 
@@ -104,18 +114,18 @@ namespace User_Service.Src.Services
                     {
                         Response = "Error al comparar las contraseñas"
                     };
-                    return Task.FromResult(response2);
+                    return response2;
             }
 
             //enviar evento a acces service
-            
+            await _updateEvent.PublishUpdateEvent(id,HashedPassword);
 
             var response =  new ResponsePassword
             {
                 Response = "Tamos Redy, contraseña cambiada"
             };
 
-            return Task.FromResult(response);
+            return response;
         }
 
         private async Task ValidateEmailAndRUT(string email, string rut)

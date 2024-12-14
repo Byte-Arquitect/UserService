@@ -19,6 +19,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IMapperService, MapperService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegisterEvent>();
+builder.Services.AddScoped<UpdatePasswordEvent>();
 
 // Configuración de DbContext con PostgreSQL
 builder.Services.AddDbContext<DataContext>(options =>
@@ -50,6 +51,11 @@ builder.Services.AddMassTransit(x =>
         cfg.Send<RegisterUserMessage>(config =>
         {
             config.UseRoutingKeyFormatter(context => "register-user-queue");
+        });
+
+        cfg.Send<UpdatePasswordMessage>(config =>
+        {
+            config.UseRoutingKeyFormatter(context => "update-password-queue");
         });
     });
 });

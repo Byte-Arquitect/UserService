@@ -24,7 +24,7 @@ namespace User_Service.Src.Producers
                     UserUuid = userUuid
             });
 
-            return new OkObjectResult("Tamos bien");
+            return new OkObjectResult("Evento enviado con éxito");
         }
     }
 }
