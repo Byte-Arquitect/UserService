@@ -33,6 +33,14 @@ namespace User_Service.Src.Services
 
         }
 
+        public override async Task<ResponsePassword> UpdatePassword(newPassword request, ServerCallContext context){
+            var response = await _authService.UpdatePassword(request,context);
+            return new ResponsePassword
+            {
+                Response = response.Response
+            };
+        }
+
         
 
     }

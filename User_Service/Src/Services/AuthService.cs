@@ -10,6 +10,7 @@ using User_Service.Src.Services.Interfaces;
 using User_Service.Src.Models;
 using User_Service.Src.DTOs.Auth;
 using User_Service.Src.Dtos;
+using User_Service.Src.Producers;
 
 namespace User_Service.Src.Services
 {
@@ -18,13 +19,16 @@ namespace User_Service.Src.Services
         private readonly ILogger<AuthService> _logger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapperService _mapperService;
+
+        private readonly RegisterEvent _registerEvent;
         
 
-        public AuthService(ILogger<AuthService> logger, IUnitOfWork unitOfWork, IMapperService mapperService)
+        public AuthService(ILogger<AuthService> logger, IUnitOfWork unitOfWork, IMapperService mapperService, RegisterEvent registerEvent)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _mapperService = mapperService;
+            _registerEvent = registerEvent;
         }
 
         public async Task<ResponseRegister> Register(RegisterUserDto request, ServerCallContext context)
@@ -62,10 +66,15 @@ namespace User_Service.Src.Services
             mappedUser.IsEnabled = true;
             mappedUser.RoleName = "Student";
             var salt = BCrypt.Net.BCrypt.GenerateSalt(12);
-            mappedUser.HashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password, salt);
+            var pass = BCrypt.Net.BCrypt.HashPassword(request.Password, salt);
+            mappedUser.HashedPassword = pass;
 
             var createdUser = await _unitOfWork.UsersRepository.Insert(mappedUser);
-
+            var Email = createdUser.Email;
+            var UserUuid = mappedUser.Id.ToString();
+            
+            
+            await _registerEvent.PublishRegisterEvent(Email,pass,UserUuid);
             // var responseLogin = "LLamada a la apiGateway del login con la contraseña "
 
             var loginUser = _mapperService.Map<User, RegisterResponseDto>(createdUser);
@@ -78,6 +87,35 @@ namespace User_Service.Src.Services
             };
 
             return response;
+        }
+        public Task<ResponsePassword> UpdatePassword(newPassword request,ServerCallContext context){
+
+            var salt = BCrypt.Net.BCrypt.GenerateSalt(12);
+
+            var password = request.Password;
+            var HashedPassword = BCrypt.Net.BCrypt.HashPassword(password, salt);
+
+            var repeatedPassword = request.RepeatedPassword;
+            var RepeatedHashedPassword = BCrypt.Net.BCrypt.HashPassword(repeatedPassword, salt);
+
+            if (!BCrypt.Net.BCrypt.Verify(password, RepeatedHashedPassword))
+                    {
+                    var response2 = new ResponsePassword
+                    {
+                        Response = "Error al comparar las contraseñas"
+                    };
+                    return Task.FromResult(response2);
+            }
+
+            //enviar evento a acces service
+            
+
+            var response =  new ResponsePassword
+            {
+                Response = "Tamos Redy, contraseña cambiada"
+            };
+
+            return Task.FromResult(response);
         }
 
         private async Task ValidateEmailAndRUT(string email, string rut)
