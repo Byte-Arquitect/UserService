@@ -21,7 +21,8 @@ public class ApiGatewayService
         var content = new StringContent(
             JsonSerializer.Serialize(payload),
             Encoding.UTF8,
-            "application/json");
+            "application/json"
+        );
 
         var response = await _httpClient.PostAsync(url, content);
 

@@ -10,7 +10,8 @@ using User_Service.Src.Repositories.Interfaces;
 
 namespace User_Service.Src.Repositories
 {
-    public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
+    public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity>
+        where TEntity : class
     {
         protected DataContext context;
         protected DbSet<TEntity> dbSet;
@@ -22,12 +23,12 @@ namespace User_Service.Src.Repositories
             InitializeDatabase();
         }
 
-       public void InitializeDatabase()
+        public void InitializeDatabase()
         {
             context.Database.EnsureCreated();
             if (context.Users.Any())
             {
-                return;   // La base de datos ya está poblada
+                return; // La base de datos ya está poblada
             }
 
             context.Users.AddRange(
@@ -46,20 +47,19 @@ namespace User_Service.Src.Repositories
                     RoleId = 2,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
-                    Version = 1
+                    Version = 1,
                 }
             );
             context.SaveChanges();
         }
 
-
         public virtual async Task<List<TEntity>> Get(
             Expression<Func<TEntity, bool>>? filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-            string includeProperties = "")
+            string includeProperties = ""
+        )
         {
             IQueryable<TEntity> query = dbSet;
-
 
             if (typeof(BaseModel).IsAssignableFrom(typeof(TEntity)))
             {
@@ -73,8 +73,12 @@ namespace User_Service.Src.Repositories
                 query = query.Where(filter);
             }
 
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (
+                var includeProperty in includeProperties.Split(
+                    new char[] { ',' },
+                    StringSplitOptions.RemoveEmptyEntries
+                )
+            )
             {
                 query = query.Include(includeProperty);
             }
@@ -94,7 +98,6 @@ namespace User_Service.Src.Repositories
                 return null;
             }
             return entity;
-
         }
 
         public virtual async Task<TEntity> Insert(TEntity entity)
@@ -122,8 +125,9 @@ namespace User_Service.Src.Repositories
 
         public async Task SoftDelete(object id)
         {
-            TEntity? entityToDelete = dbSet.Find(id) ??
-                throw new EntityDeletedException($"Entity with Id: {id} cannot be deleted");
+            TEntity? entityToDelete =
+                dbSet.Find(id)
+                ?? throw new EntityDeletedException($"Entity with Id: {id} cannot be deleted");
 
             if (entityToDelete is BaseModel baseModel && baseModel.DeletedAt is null)
             {
@@ -134,8 +138,9 @@ namespace User_Service.Src.Repositories
 
         public virtual async Task Delete(object id)
         {
-            TEntity? entityToDelete = dbSet.Find(id) ??
-                throw new EntityDeletedException($"Entity with Id: {id} cannot be deleted");
+            TEntity? entityToDelete =
+                dbSet.Find(id)
+                ?? throw new EntityDeletedException($"Entity with Id: {id} cannot be deleted");
 
             await Delete(entityToDelete);
         }
@@ -149,7 +154,8 @@ namespace User_Service.Src.Repositories
             dbSet.Remove(entityToDelete);
 
             var result = await context.SaveChangesAsync() > 0;
-            if (!result) throw new EntityDeletedException($"Entity: {entityToDelete} cannot be deleted");
+            if (!result)
+                throw new EntityDeletedException($"Entity: {entityToDelete} cannot be deleted");
         }
 
         public virtual async Task<TEntity> Update(TEntity entityToUpdate)
@@ -166,6 +172,5 @@ namespace User_Service.Src.Repositories
             await context.SaveChangesAsync();
             return entityToUpdate;
         }
-
     }
 }

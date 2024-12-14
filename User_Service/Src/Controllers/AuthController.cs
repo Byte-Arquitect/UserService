@@ -21,27 +21,22 @@ namespace User_Service.Src.Services
             _authService = authService;
         }
 
-        
-        public override async Task<ResponseRegister> Register(RegisterUserDto request, ServerCallContext context){
-            
-            var response = await _authService.Register(request,context);
-            return new ResponseRegister
-            {
-                User = response.User,
-                Token = response.Token
-            };
-
+        public override async Task<ResponseRegister> Register(
+            RegisterUserDto request,
+            ServerCallContext context
+        )
+        {
+            var response = await _authService.Register(request, context);
+            return new ResponseRegister { User = response.User, Token = response.Token };
         }
 
-        public override async Task<ResponsePassword> UpdatePassword(newPassword request, ServerCallContext context){
-            var response = await _authService.UpdatePassword(request,context);
-            return new ResponsePassword
-            {
-                Response = response.Response
-            };
+        public override async Task<ResponsePassword> UpdatePassword(
+            newPassword request,
+            ServerCallContext context
+        )
+        {
+            var response = await _authService.UpdatePassword(request, context);
+            return new ResponsePassword { Response = response.Response };
         }
-
-        
-
     }
 }

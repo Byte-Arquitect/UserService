@@ -1,7 +1,61 @@
 syntax = "proto3";
 
 option csharp_namespace = "User_Service.Src.Protos";
+import "google/api/annotations.proto";
 
-service UserProto{
-    
+service UserProto {
+    rpc myProgress(RequestMyProgress) returns (ResponseMyProgress) {
+        option (google.api.http) = {
+            get: "/grpc/user/get-progress/{id}"
+        };
+    }
+    rpc SetMyProgress(RequestSetMyProgress) returns (ResponseSetMyProgress){
+        option (google.api.http) = {
+            post: "/grpc/user/set-progress/{id}"
+            body: "*"
+        };
+    }
+    rpc GetProfile (RequestMyProgress) returns (ResponseGetProfile){
+        option (google.api.http) = {
+            get: "/grpc/user/get-profile/{id}"
+        };
+    }
+}
+
+message RequestMyProgress {
+    string id = 1;
+}
+
+message ResponseMyProgress {
+    repeated GetProgressDto get_progress = 1; 
+}
+
+message GetProgressDto {
+    string subject_code = 1;
+    string subject_name = 2; 
+}
+
+message RequestSetMyProgress {
+    repeated SubjectsListDto subjectsToAdd = 1;
+    repeated SubjectsListDto subjectsToDelete = 2;
+    string id = 3;
+}
+
+message SubjectsListDto {
+    string subjectId = 1;
+}
+
+message ResponseSetMyProgress {
+    string message = 1;
+}
+
+message ResponseGetProfile {
+    string id = 1;
+    string name = 2;
+    string firstLastName = 3;
+    string secondLastName = 4;
+    string rut = 5;
+    string email = 6;
+    string nameCareer = 7;
+    string idCareer = 8;
 }

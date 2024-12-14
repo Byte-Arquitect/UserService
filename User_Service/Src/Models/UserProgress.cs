@@ -5,11 +5,14 @@ using System.Threading.Tasks;
 
 namespace User_Service.Src.Models
 {
-    public class UserProgress: BaseModel
+    public class UserProgress : BaseModel
     {
         public int UserId { get; set; }
 
         public int SubjectId { get; set; }
-        
+
+        public string SubjectCode { get; set; } = null!;
+
+        public string SubjectName { get; set; } = null!;
     }
 }

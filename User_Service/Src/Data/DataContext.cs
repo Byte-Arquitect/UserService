@@ -10,6 +10,4 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     {
         base.OnModelCreating(modelBuilder);
     }
-
-    
 }

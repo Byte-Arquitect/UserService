@@ -8,7 +8,7 @@ namespace User_Service.Src.Models
 {
     public class User : BaseModel
     {
-         [StringLength(250)]
+        [StringLength(250)]
         public string Name { get; set; } = null!;
 
         [StringLength(250)]

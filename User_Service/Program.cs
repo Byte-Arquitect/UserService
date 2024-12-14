@@ -1,13 +1,14 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Shared.Messages;
+using User_Service.Src.Controllers;
+using User_Service.Src.Extensions;
 using User_Service.Src.Middleware;
 using User_Service.Src.Producers;
 using User_Service.Src.Repositories;
 using User_Service.Src.Repositories.Interfaces;
 using User_Service.Src.Services;
 using User_Service.Src.Services.Interfaces;
-using User_Service.Src.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,11 +16,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(typeof(Program));
 
 // Repositorios y servicios
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IMapperService, MapperService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ApiGatewayService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RegisterEvent>();
 builder.Services.AddScoped<UpdatePasswordEvent>();
+
+builder.Services.AddHttpClient();
 
 // Configuración de DbContext con PostgreSQL
 builder.Services.AddDbContext<DataContext>(options =>
@@ -28,10 +34,12 @@ builder.Services.AddDbContext<DataContext>(options =>
 });
 
 // Configuración de gRPC con JSON Transcoding e interceptores
-builder.Services.AddGrpc(options =>
-{
-    options.Interceptors.Add<ExceptionHandlingInterceptor>();
-}).AddJsonTranscoding();
+builder
+    .Services.AddGrpc(options =>
+    {
+        options.Interceptors.Add<ExceptionHandlingInterceptor>();
+    })
+    .AddJsonTranscoding();
 builder.Services.AddGrpcReflection();
 
 // Swagger para documentación (opcional)
@@ -40,26 +48,31 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddMassTransit(x =>
 {
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host("localhost", "/", h =>
+    x.UsingRabbitMq(
+        (context, cfg) =>
         {
-            h.Username("guest");
-            h.Password("guest");
-        });
+            cfg.Host(
+                "localhost",
+                "/",
+                h =>
+                {
+                    h.Username("guest");
+                    h.Password("guest");
+                }
+            );
 
-        cfg.Send<RegisterUserMessage>(config =>
-        {
-            config.UseRoutingKeyFormatter(context => "register-user-queue");
-        });
+            cfg.Send<RegisterUserMessage>(config =>
+            {
+                config.UseRoutingKeyFormatter(context => "register-user-queue");
+            });
 
-        cfg.Send<UpdatePasswordMessage>(config =>
-        {
-            config.UseRoutingKeyFormatter(context => "update-password-queue");
-        });
-    });
+            cfg.Send<UpdatePasswordMessage>(config =>
+            {
+                config.UseRoutingKeyFormatter(context => "update-password-queue");
+            });
+        }
+    );
 });
-
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
@@ -78,6 +91,7 @@ if (app.Environment.IsDevelopment())
 
 // Mapear servicios gRPC
 app.MapGrpcService<AuthController>();
+app.MapGrpcService<UserController>();
 app.MapGrpcService<TestService>();
 
 // Reflexión de gRPC (solo desarrollo)

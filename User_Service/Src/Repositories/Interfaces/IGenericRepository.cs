@@ -1,18 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace User_Service.Src.Repositories.Interfaces
 {
-    public interface IGenericRepository<TEntity> where TEntity : class
+    public interface IGenericRepository<TEntity>
+        where TEntity : class
     {
         Task<List<TEntity>> Get(
             Expression<Func<TEntity, bool>>? filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
-            string includeProperties = "");
+            string includeProperties = ""
+        );
 
         Task<TEntity?> GetByID(object id);
 

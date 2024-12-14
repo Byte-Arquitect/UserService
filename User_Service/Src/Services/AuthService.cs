@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
+using User_Service.Src.Dtos;
+using User_Service.Src.DTOs.Auth;
 using User_Service.Src.Exceptions;
+using User_Service.Src.Models;
+using User_Service.Src.Producers;
 using User_Service.Src.Protos;
 using User_Service.Src.Repositories.Interfaces;
 using User_Service.Src.Services.Interfaces;
-using User_Service.Src.Models;
-using User_Service.Src.DTOs.Auth;
-using User_Service.Src.Dtos;
-using User_Service.Src.Producers;
 
 namespace User_Service.Src.Services
 {
@@ -22,15 +22,14 @@ namespace User_Service.Src.Services
 
         private readonly RegisterEvent _registerEvent;
         private readonly UpdatePasswordEvent _updateEvent;
-        
 
         public AuthService(
-            ILogger<AuthService> logger, 
-            IUnitOfWork unitOfWork, 
-            IMapperService mapperService, 
+            ILogger<AuthService> logger,
+            IUnitOfWork unitOfWork,
+            IMapperService mapperService,
             RegisterEvent registerEvent,
             UpdatePasswordEvent updateEvent
-            )
+        )
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -39,7 +38,10 @@ namespace User_Service.Src.Services
             _updateEvent = updateEvent;
         }
 
-        public async Task<ResponseRegister> Register(RegisterUserDto request, ServerCallContext context)
+        public async Task<ResponseRegister> Register(
+            RegisterUserDto request,
+            ServerCallContext context
+        )
         {
             var response1 = request.ToString();
             Console.WriteLine($"Received request for Register: {response1}");
@@ -54,7 +56,7 @@ namespace User_Service.Src.Services
             int careerId = request.CareerId;
             if (roleId is 3)
                 throw new EntityNotFoundException($"Career with ID: {request.CareerId} not found");
-            
+
             var userOnRequest = new RegisterStudentDto
             {
                 Name = request.Name,
@@ -64,7 +66,7 @@ namespace User_Service.Src.Services
                 Email = request.Email,
                 CareerName = "ICCI",
                 Password = request.Password,
-                RepeatedPassword = request.RepeatedPassword
+                RepeatedPassword = request.RepeatedPassword,
             };
 
             var mappedUser = _mapperService.Map<RegisterStudentDto, User>(userOnRequest);
@@ -80,24 +82,25 @@ namespace User_Service.Src.Services
             var createdUser = await _unitOfWork.UsersRepository.Insert(mappedUser);
             var Email = createdUser.Email;
             var UserUuid = mappedUser.Id.ToString();
-            
-            
-            await _registerEvent.PublishRegisterEvent(Email,pass,UserUuid);
+
+            await _registerEvent.PublishRegisterEvent(Email, pass, UserUuid);
             // var responseLogin = "LLamada a la apiGateway del login con la contraseña "
 
             var loginUser = _mapperService.Map<User, RegisterResponseDto>(createdUser);
             string token = "token";
-            var UserResponse = _mapperService.Map<RegisterResponseDto, UserRegisterResponse>(loginUser);
-            var response = new ResponseRegister
-            {
-                User = UserResponse,
-                Token = token
-            };
+            var UserResponse = _mapperService.Map<RegisterResponseDto, UserRegisterResponse>(
+                loginUser
+            );
+            var response = new ResponseRegister { User = UserResponse, Token = token };
 
             return response;
         }
-        public async Task<ResponsePassword> UpdatePassword(newPassword request,ServerCallContext context){
 
+        public async Task<ResponsePassword> UpdatePassword(
+            newPassword request,
+            ServerCallContext context
+        )
+        {
             string id = request.UserId;
 
             var salt = BCrypt.Net.BCrypt.GenerateSalt(12);
@@ -109,21 +112,18 @@ namespace User_Service.Src.Services
             var RepeatedHashedPassword = BCrypt.Net.BCrypt.HashPassword(repeatedPassword, salt);
 
             if (!BCrypt.Net.BCrypt.Verify(password, RepeatedHashedPassword))
-                    {
-                    var response2 = new ResponsePassword
-                    {
-                        Response = "Error al comparar las contraseñas"
-                    };
-                    return response2;
+            {
+                var response2 = new ResponsePassword
+                {
+                    Response = "Error al comparar las contraseñas",
+                };
+                return response2;
             }
 
             //enviar evento a acces service
-            await _updateEvent.PublishUpdateEvent(id,HashedPassword);
+            await _updateEvent.PublishUpdateEvent(id, HashedPassword);
 
-            var response =  new ResponsePassword
-            {
-                Response = "Tamos Redy, contraseña cambiada"
-            };
+            var response = new ResponsePassword { Response = "Tamos Redy, contraseña cambiada" };
 
             return response;
         }
@@ -138,6 +138,5 @@ namespace User_Service.Src.Services
             if (user is not null)
                 throw new DuplicateUserException("RUT already in use");
         }
-        
     }
 }

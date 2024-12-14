@@ -11,5 +11,7 @@ namespace User_Service.Src.Repositories.Interfaces
     {
         public Task<User?> GetByEmail(string email);
         public Task<User?> GetByRut(string rut);
+
+        public Task<List<UserProgress?>> GetUserProgress(string id);
     }
 }
