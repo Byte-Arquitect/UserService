@@ -1,6 +1,6 @@
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using User_Service.Src.Messages;
+using Shared.Messages;
 using User_Service.Src.Middleware;
 using User_Service.Src.Producers;
 using User_Service.Src.Repositories;
@@ -41,7 +41,7 @@ builder.Services.AddMassTransit(x =>
 {
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("rabbitmq://localhost", h =>
+        cfg.Host("localhost", "/", h =>
         {
             h.Username("guest");
             h.Password("guest");

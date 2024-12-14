@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using User_Service.Src.Dtos;
 
 
-namespace User_Service.Src.Messages
+namespace Shared.Messages
 {
     public class RegisterUserMessage
     {

@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using User_Service.Src.Dtos;
-using User_Service.Src.Messages;
+using Shared.Messages;
 
 namespace User_Service.Src.Producers
 {
@@ -15,20 +15,13 @@ namespace User_Service.Src.Producers
             _publishEnpoint = publishEnpoint;
         }
 
-        public async Task<IActionResult> PublishRegisterEvent(string Email, string Password, string userUuid)
+        public async Task<IActionResult> PublishRegisterEvent(string email, string password, string userUuid)
         {
-            var userEmail = Email;
-            var userPass = Password;
-            var userUUID = userUuid;
-
-            await _publishEnpoint.Publish<RegisterUserMessage>(new
+            await _publishEnpoint.Publish<RegisterUserMessage>(new RegisterUserMessage
             {
-                UserToLogin = new RegisterUserMessage
-                {
-                    Email = userEmail,
-                    Password = userPass,
-                    UserUuid = userUUID
-                }
+                    Email = email,
+                    Password = password,
+                    UserUuid = userUuid
             });
 
             return new OkObjectResult("Tamos bien");
