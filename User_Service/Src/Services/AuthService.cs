@@ -85,10 +85,22 @@ namespace User_Service.Src.Services
 
             await _registerEvent.PublishRegisterEvent(Email, pass, UserUuid);
             var loginUser = _mapperService.Map<User, RegisterResponseDto>(createdUser);
+
+            var UserResponse = _mapperService.Map<RegisterResponseDto, UserRegisterResponse>(
+                loginUser
+            );
+            var responseContent = await loginApiGateway(request.Email, request.Password);
+            var response = new ResponseRegister { User = UserResponse, Token = responseContent };
+
+            return response;
+        }
+
+        private async Task<string> loginApiGateway(string email, string password)
+        {
             var responseContent = "";
             using (var httpClient = new HttpClient())
             {
-                var loginData = new { Email = loginUser.Email, Password = pass };
+                var loginData = new { Email = email, Password = password };
 
                 var jsonContent = new StringContent(
                     Newtonsoft.Json.JsonConvert.SerializeObject(loginData),
@@ -114,12 +126,7 @@ namespace User_Service.Src.Services
 
                 responseContent = await responseApiGateway.Content.ReadAsStringAsync();
             }
-            var UserResponse = _mapperService.Map<RegisterResponseDto, UserRegisterResponse>(
-                loginUser
-            );
-            var response = new ResponseRegister { User = UserResponse, Token = responseContent };
-
-            return response;
+            return responseContent;
         }
 
         public async Task<ResponsePassword> UpdatePassword(
