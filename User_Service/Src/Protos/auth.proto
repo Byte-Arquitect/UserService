@@ -52,7 +52,6 @@ message ResponseRegister{
 message newPassword{
     string password = 1;
     string repeatedPassword = 2;
-    string userId = 3;
 }
 
 message ResponsePassword{

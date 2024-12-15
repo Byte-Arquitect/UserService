@@ -10,6 +10,9 @@ namespace User_Service.Src.Services.Interfaces
     public interface IAuthService
     {
         public Task<ResponseRegister> Register(RegisterUserDto request, ServerCallContext context);
-        public Task<ResponsePassword> UpdatePassword(newPassword request,ServerCallContext context);
+        public Task<ResponsePassword> UpdatePassword(
+            newPassword request,
+            ServerCallContext context
+        );
     }
 }

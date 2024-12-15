@@ -9,7 +9,7 @@ namespace User_Service.Src.Models
     {
         public int UserId { get; set; }
 
-        public int SubjectId { get; set; }
+        public string SubjectId { get; set; }
 
         public string SubjectCode { get; set; } = null!;
 

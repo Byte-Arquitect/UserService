@@ -11,12 +11,12 @@ public class ApiGatewayService
     public ApiGatewayService(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
-        _apiGatewayBaseUrl = configuration["ApiGateway:BaseUrl"];
+        _apiGatewayBaseUrl = "http://localhost:5111";
     }
 
     public async Task<string> CallApiGatewayAsync(string endpoint, object payload)
     {
-        var url = $"{_apiGatewayBaseUrl}/{endpoint}";
+        var uri = new Uri(new Uri(_apiGatewayBaseUrl), endpoint);
 
         var content = new StringContent(
             JsonSerializer.Serialize(payload),
@@ -24,7 +24,7 @@ public class ApiGatewayService
             "application/json"
         );
 
-        var response = await _httpClient.PostAsync(url, content);
+        var response = await _httpClient.PostAsync(uri, content);
 
         if (response.IsSuccessStatusCode)
         {

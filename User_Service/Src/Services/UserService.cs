@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Grpc.Core;
 using User_Service.Src.Models;
 using User_Service.Src.Protos;
@@ -10,15 +11,26 @@ namespace User_Service.Src.Services
     {
         private readonly IUserRepository userRepository;
         private readonly ApiGatewayService apiGatewayService;
+        private readonly AuthService authService;
 
-        public UserService(IUserRepository userRepository, ApiGatewayService apiGatewayService)
+        private readonly IUserProgressRepository userProgressRepository;
+
+        public UserService(
+            IUserRepository userRepository,
+            ApiGatewayService apiGatewayService,
+            AuthService authService,
+            IUserProgressRepository userProgressRepository
+        )
         {
             this.userRepository = userRepository;
             this.apiGatewayService = apiGatewayService;
+            this.authService = authService;
+            this.userProgressRepository = userProgressRepository;
         }
 
-        public Task<ResponseMyProgress> GetUserProgress(string id, ServerCallContext context)
+        public Task<ResponseMyProgress> GetUserProgress(ServerCallContext context)
         {
+            var id = authService.GetIdByToken(context).Result;
             var listofProgress = userRepository.GetUserProgress(id);
 
             var response = new List<GetProgressDto>();
@@ -42,12 +54,8 @@ namespace User_Service.Src.Services
             ServerCallContext context
         )
         {
-            // Obtener el contexto HTTP desde gRPC
             var httpContext = context.GetHttpContext();
-
-            // Obtener el token desde los headers HTTP
             var authHeader = httpContext.Request.Headers["Authorization"].FirstOrDefault();
-
             if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
             {
                 throw new RpcException(
@@ -60,12 +68,110 @@ namespace User_Service.Src.Services
 
             var token = authHeader.Substring("Bearer ".Length);
 
-            var subjects = await apiGatewayService.CallApiGatewayAsync("/subject/", new { token });
-            return new ResponseSetMyProgress { Message = subjects.ToString() };
+            string id = await authService.GetIdByToken(context);
+
+            if (await userRepository.GetByID(id) == null)
+            {
+                return new ResponseSetMyProgress { Message = "Usuario no encontrado" };
+            }
+
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+                var response = await httpClient.GetAsync("http://localhost:5111/subject/");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new RpcException(
+                        new Status(
+                            StatusCode.Internal,
+                            $"Error calling external API: {response.ReasonPhrase}"
+                        )
+                    );
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var subjectsResponse = JsonSerializer.Deserialize<SubjectsResponse>(
+                    responseContent,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+
+                var subjects = subjectsResponse?.Subjects;
+
+                var subjectsToAdd = request.SubjectsCodesToAdd;
+                var subjectsToRemove = request.SubjectsCodesToDelete;
+                var userProgress = userRepository.GetUserProgress(id);
+
+                if (subjectsToAdd.Count > 0)
+                {
+                    for (int i = subjectsToAdd.Count - 1; i >= 0; i--)
+                    {
+                        var subject = subjectsToAdd[i];
+                        if (!subjects.Any(s => s.Code == subject))
+                        {
+                            subjectsToAdd.RemoveAt(i);
+                        }
+                    }
+                    for (int i = subjectsToAdd.Count - 1; i >= 0; i--)
+                    {
+                        var subject = subjectsToAdd[i];
+                        if (userProgress.Result.Any(s => s.SubjectCode == subject))
+                        {
+                            subjectsToAdd.RemoveAt(i);
+                        }
+                    }
+                    foreach (var subject in subjectsToAdd)
+                    {
+                        Console.WriteLine($"Insertando el ramo: {subject}");
+                        _ = await userProgressRepository.Insert(
+                            new UserProgress
+                            {
+                                UserId = int.Parse(id),
+                                SubjectId = subjects.First(s => s.Code == subject).Id,
+                                SubjectCode = subject,
+                                SubjectName = subjects.First(s => s.Code == subject).Name,
+                            }
+                        );
+                    }
+                }
+                if (subjectsToRemove.Count > 0)
+                {
+                    for (int i = subjectsToRemove.Count - 1; i >= 0; i--)
+                    {
+                        var subject = subjectsToRemove[i];
+                        if (!subjects.Any(s => s.Code == subject))
+                        {
+                            subjectsToRemove.RemoveAt(i);
+                        }
+                    }
+                    for (int i = subjectsToRemove.Count - 1; i >= 0; i--)
+                    {
+                        var subject = subjectsToRemove[i];
+                        if (!userProgress.Result.Any(s => s.SubjectCode == subject))
+                        {
+                            subjectsToRemove.RemoveAt(i);
+                        }
+                    }
+                    foreach (var subject in subjectsToRemove)
+                    {
+                        var subjectToRemove = userProgress.Result.First(s =>
+                            s.SubjectCode == subject
+                        );
+                        await userProgressRepository.Delete(subjectToRemove);
+                    }
+                }
+                return new ResponseSetMyProgress
+                {
+                    Message = $"Asignaturas eliminadas y agregadas con éxito",
+                };
+            }
         }
 
-        public async Task<ResponseGetProfile> GetUserProfile(string id, ServerCallContext context)
+        public async Task<ResponseGetProfile> GetUserProfile(ServerCallContext context)
         {
+            var id = await authService.GetIdByToken(context);
             var userId = int.Parse(id);
             var profile = await userRepository.GetByID(userId);
 

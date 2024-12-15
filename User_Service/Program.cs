@@ -17,6 +17,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 // Repositorios y servicios
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserProgressRepository, UserProgressRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IMapperService, MapperService>();
 builder.Services.AddScoped<IUserService, UserService>();

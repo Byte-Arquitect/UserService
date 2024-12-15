@@ -9,11 +9,11 @@ namespace User_Service.Src.Services.Interfaces
 {
     public interface IUserService
     {
-        public Task<ResponseMyProgress> GetUserProgress(string id, ServerCallContext context);
+        public Task<ResponseMyProgress> GetUserProgress(ServerCallContext context);
         public Task<ResponseSetMyProgress> SetUserProgress(
             RequestSetMyProgress request,
             ServerCallContext context
         );
-        public Task<ResponseGetProfile> GetUserProfile(string id, ServerCallContext context);
+        public Task<ResponseGetProfile> GetUserProfile(ServerCallContext context);
     }
 }

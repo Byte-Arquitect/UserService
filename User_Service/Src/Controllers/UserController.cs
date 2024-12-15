@@ -22,21 +22,13 @@ namespace User_Service.Src.Controllers
         }
 
         public override async Task<ResponseMyProgress> myProgress(
-            RequestMyProgress request,
+            Empty request,
             ServerCallContext context
         )
         {
             try
             {
-                var httpContext = context.GetHttpContext();
-                var id = httpContext.Request.RouteValues["id"]?.ToString();
-                if (string.IsNullOrEmpty(id))
-                {
-                    throw new RpcException(
-                        new Status(StatusCode.InvalidArgument, "ID is required")
-                    );
-                }
-                var userProgress = await _userService.GetUserProgress(id, context);
+                var userProgress = await _userService.GetUserProgress(context);
                 return userProgress;
             }
             catch (Exception e)
@@ -53,14 +45,6 @@ namespace User_Service.Src.Controllers
         {
             try
             {
-                var httpContext = context.GetHttpContext();
-                var id = httpContext.Request.RouteValues["id"]?.ToString();
-                if (string.IsNullOrEmpty(id))
-                {
-                    throw new RpcException(
-                        new Status(StatusCode.InvalidArgument, "ID is required")
-                    );
-                }
                 var response = await _userService.SetUserProgress(request, context);
                 return response;
             }
@@ -72,21 +56,13 @@ namespace User_Service.Src.Controllers
         }
 
         public override async Task<ResponseGetProfile> GetProfile(
-            RequestMyProgress request,
+            Empty request,
             ServerCallContext context
         )
         {
             try
             {
-                var httpContext = context.GetHttpContext();
-                var id = httpContext.Request.RouteValues["id"]?.ToString();
-                if (string.IsNullOrEmpty(id))
-                {
-                    throw new RpcException(
-                        new Status(StatusCode.InvalidArgument, "ID is required")
-                    );
-                }
-                var userProfile = await _userService.GetUserProfile(id, context);
+                var userProfile = await _userService.GetUserProfile(context);
                 return userProfile;
             }
             catch (Exception e)

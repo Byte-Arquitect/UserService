@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
@@ -101,7 +102,8 @@ namespace User_Service.Src.Services
             ServerCallContext context
         )
         {
-            string id = request.UserId;
+            // Obtener los metadatos
+            string id = await GetIdByToken(context);
 
             var salt = BCrypt.Net.BCrypt.GenerateSalt(12);
 
@@ -115,7 +117,7 @@ namespace User_Service.Src.Services
             {
                 var response2 = new ResponsePassword
                 {
-                    Response = "Error al comparar las contraseñas",
+                    Response = $"Error al comparar las contraseñas",
                 };
                 return response2;
             }
@@ -123,7 +125,7 @@ namespace User_Service.Src.Services
             //enviar evento a acces service
             await _updateEvent.PublishUpdateEvent(id, HashedPassword);
 
-            var response = new ResponsePassword { Response = "Tamos Redy, contraseña cambiada" };
+            var response = new ResponsePassword { Response = $"Contraseña cambiada" };
 
             return response;
         }
@@ -137,6 +139,25 @@ namespace User_Service.Src.Services
             user = await _unitOfWork.UsersRepository.GetByRut(rut);
             if (user is not null)
                 throw new DuplicateUserException("RUT already in use");
+        }
+
+        public async Task<string> GetIdByToken(ServerCallContext context)
+        {
+            string token = await GetToken(context);
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+            var id = jsonToken?.Claims.FirstOrDefault(c => c.Type == "UserUuid")?.Value;
+            return id;
+        }
+
+        public async Task<string> GetToken(ServerCallContext context)
+        {
+            var headers = context.RequestHeaders;
+            var authorizationHeader = headers.GetValue("authorization");
+            var token = authorizationHeader.StartsWith("Bearer ")
+                ? authorizationHeader.Substring("Bearer ".Length)
+                : authorizationHeader;
+            return token;
         }
     }
 }
