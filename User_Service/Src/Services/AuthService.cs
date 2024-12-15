@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Newtonsoft.Json;
@@ -90,6 +91,8 @@ namespace User_Service.Src.Services
                 loginUser
             );
             var responseContent = await loginApiGateway(request.Email, request.Password);
+            var jsonDoc = JsonDocument.Parse(responseContent);
+            string token = jsonDoc.RootElement.GetProperty("token").GetString();
             var response = new ResponseRegister { User = UserResponse, Token = responseContent };
 
             return response;
