@@ -53,8 +53,8 @@ namespace User_Service.Src.Services
             int roleId = 1;
             if (roleId is 3)
                 throw new InternalErrorException("Role not found");
-            int careerId = request.CareerId;
-            if (careerId is 3)
+            string careerId = request.CareerId;
+            if (careerId is "3")
                 throw new EntityNotFoundException($"Career with ID: {request.CareerId} not found");
 
             var userOnRequest = new RegisterStudentDto
@@ -72,7 +72,7 @@ namespace User_Service.Src.Services
             var mappedUser = _mapperService.Map<RegisterStudentDto, User>(userOnRequest);
 
             mappedUser.RoleId = roleId;
-            mappedUser.CareerId = careerId;
+            mappedUser.CareerId = careerId.ToString();
             mappedUser.IsEnabled = true;
             mappedUser.RoleName = "Student";
             var salt = BCrypt.Net.BCrypt.GenerateSalt(12);

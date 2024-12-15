@@ -28,7 +28,7 @@ namespace User_Service.Src.Models
 
         public bool IsEnabled { get; set; } = true;
         public string CareerName { get; set; } = null!;
-        public int CareerId { get; set; }
+        public string CareerId { get; set; } = null!;
         public string RoleName { get; set; } = null!;
         public int RoleId { get; set; }
     }

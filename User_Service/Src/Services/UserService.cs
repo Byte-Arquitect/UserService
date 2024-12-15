@@ -184,7 +184,7 @@ namespace User_Service.Src.Services
                 Rut = profile.RUT,
                 Email = profile.Email,
                 NameCareer = profile.CareerName,
-                IdCareer = profile.CareerId.ToString(),
+                IdCareer = profile.CareerId,
             };
         }
 
@@ -203,8 +203,10 @@ namespace User_Service.Src.Services
             var user = userRepository.GetByID(int.Parse(id)).Result;
 
             user.Name = request.Name != "" ? request.Name : user.Name;
-            user.FirstLastName = request.FirstLastName != "" ? request.FirstLastName : user.FirstLastName;
-            user.SecondLastName = request.SecondLastName != "" ? request.SecondLastName : user.SecondLastName;
+            user.FirstLastName =
+                request.FirstLastName != "" ? request.FirstLastName : user.FirstLastName;
+            user.SecondLastName =
+                request.SecondLastName != "" ? request.SecondLastName : user.SecondLastName;
 
             var updatedUser = await userRepository.Update(user);
 

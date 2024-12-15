@@ -42,7 +42,7 @@ namespace User_Service.Src.Repositories
                     HashedPassword = "hashed_password_123", // Usa un hash real aquí
                     IsEnabled = true,
                     CareerName = "Computer Science",
-                    CareerId = 1,
+                    CareerId = "1",
                     RoleName = "User",
                     RoleId = 2,
                     CreatedAt = DateTime.UtcNow,

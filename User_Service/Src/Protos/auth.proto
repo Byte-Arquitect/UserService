@@ -28,7 +28,7 @@ message RegisterUserDto{
     string secondlastname = 3;
     string rut = 4;
     string email = 5;
-    int32 careerId = 6;
+    string careerId = 6;
     string password = 7;
     string repeatedPassword = 8;
 }

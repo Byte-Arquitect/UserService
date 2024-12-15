@@ -9,26 +9,24 @@ namespace User_Service.Src.Data
 {
     public class Seeder
     {
-        
-        
-        
-        
         public static void SeedData(DataContext context)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             SeedUsers(context, options);
         }
 
-        
         private static void SeedUsers(DataContext context, JsonSerializerOptions options)
         {
             var result = context.Users?.Any();
-            if (result is true or null) return;
+            if (result is true or null)
+                return;
             var path = "Src/Data/DataSeeders/userSeed.json";
             var usersData = File.ReadAllText(path);
-            var usersList = JsonSerializer.Deserialize<List<User>>(usersData, options) ??
-                throw new Exception("UsersData.json is empty");
+            var usersList =
+                JsonSerializer.Deserialize<List<User>>(usersData, options)
+                ?? throw new Exception("UsersData.json is empty");
             // Normalize the name and code of the careers
             usersList.ForEach(s =>
             {

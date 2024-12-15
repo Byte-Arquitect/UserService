@@ -31,9 +31,10 @@ namespace User_Service.Src.DTOs.Auth
 
         [Required]
         [StringLength(16, MinimumLength = 10)]
-        [RegularExpression(RegularExpressions.PasswordValidation,
-            ErrorMessage = "La contraseña debe de tener un numero y una letra como minimo y tener una longitud de 10 a 16 caracteres")
-        ]
+        [RegularExpression(
+            RegularExpressions.PasswordValidation,
+            ErrorMessage = "La contraseña debe de tener un numero y una letra como minimo y tener una longitud de 10 a 16 caracteres"
+        )]
         public string Password { get; set; } = null!;
 
         [Required]

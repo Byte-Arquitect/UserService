@@ -8,7 +8,7 @@
         "HashedPassword" : "hashed_password_123", 
         "IsEnabled" : true,
         "CareerName" : "Computer Science",
-        "CareerId" : 1,
+        "CareerId" : "1",
         "RoleName" : "User",
         "RoleId" : 2,
         "Version" : 1
