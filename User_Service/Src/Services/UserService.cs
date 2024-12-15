@@ -70,7 +70,7 @@ namespace User_Service.Src.Services
 
             string id = await authService.GetIdByToken(context);
 
-            if (await userRepository.GetByID(id) == null)
+            if (await userRepository.GetByID(int.Parse(id)) == null)
             {
                 return new ResponseSetMyProgress { Message = "Usuario no encontrado" };
             }
@@ -186,6 +186,29 @@ namespace User_Service.Src.Services
                 NameCareer = profile.CareerName,
                 IdCareer = profile.CareerId.ToString(),
             };
+        }
+
+        public async Task<ResponseEditProfile> EditUserProfile(
+            RequestEditProfile request,
+            ServerCallContext context
+        )
+        {
+            string id = authService.GetIdByToken(context).Result;
+
+            if (userRepository.GetByID(id) == null)
+            {
+                return new ResponseEditProfile { Status = "5", Message = "Usuario no encontrado" };
+            }
+
+            var user = userRepository.GetByID(int.Parse(id)).Result;
+
+            user.Name = request.Name != "" ? request.Name : user.Name;
+            user.FirstLastName = request.FirstLastName != "" ? request.FirstLastName : user.FirstLastName;
+            user.SecondLastName = request.SecondLastName != "" ? request.SecondLastName : user.SecondLastName;
+
+            var updatedUser = await userRepository.Update(user);
+
+            return new ResponseEditProfile { Status = "0", Message = "Usuario editado con exito" };
         }
     }
 }

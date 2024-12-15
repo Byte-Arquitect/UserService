@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Grpc.Core;
+using Newtonsoft.Json;
 using User_Service.Src.Dtos;
 using User_Service.Src.DTOs.Auth;
 using User_Service.Src.Exceptions;
@@ -48,14 +50,11 @@ namespace User_Service.Src.Services
             Console.WriteLine($"Received request for Register: {response1}");
 
             await ValidateEmailAndRUT(request.Email, request.Rut);
-
-            // var role = await "ApiGateway/AuthService/GetRoleByName"
             int roleId = 1;
             if (roleId is 3)
                 throw new InternalErrorException("Role not found");
-            // var career = await "ApiGateway/AuthService/GetCareerByName"
             int careerId = request.CareerId;
-            if (roleId is 3)
+            if (careerId is 3)
                 throw new EntityNotFoundException($"Career with ID: {request.CareerId} not found");
 
             var userOnRequest = new RegisterStudentDto
@@ -85,14 +84,40 @@ namespace User_Service.Src.Services
             var UserUuid = mappedUser.Id.ToString();
 
             await _registerEvent.PublishRegisterEvent(Email, pass, UserUuid);
-            // var responseLogin = "LLamada a la apiGateway del login con la contraseña "
-
             var loginUser = _mapperService.Map<User, RegisterResponseDto>(createdUser);
-            string token = "token";
+            var responseContent = "";
+            using (var httpClient = new HttpClient())
+            {
+                var loginData = new { Email = loginUser.Email, Password = pass };
+
+                var jsonContent = new StringContent(
+                    Newtonsoft.Json.JsonConvert.SerializeObject(loginData),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                // Realizar la solicitud POST
+                var responseApiGateway = await httpClient.PostAsync(
+                    "http://localhost:5111/login",
+                    jsonContent
+                );
+
+                if (!responseApiGateway.IsSuccessStatusCode)
+                {
+                    throw new RpcException(
+                        new Status(
+                            StatusCode.Internal,
+                            $"Error calling external API: {responseApiGateway.ReasonPhrase}"
+                        )
+                    );
+                }
+
+                responseContent = await responseApiGateway.Content.ReadAsStringAsync();
+            }
             var UserResponse = _mapperService.Map<RegisterResponseDto, UserRegisterResponse>(
                 loginUser
             );
-            var response = new ResponseRegister { User = UserResponse, Token = token };
+            var response = new ResponseRegister { User = UserResponse, Token = responseContent };
 
             return response;
         }

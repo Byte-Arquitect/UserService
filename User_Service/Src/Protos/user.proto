@@ -21,6 +21,12 @@ service UserProto {
             get: "/grpc/user/get-profile"
         };
     }
+    rpc EditProfile (RequestEditProfile) returns (ResponseEditProfile){
+        option (google.api.http) = {
+            patch: "/grpc/user/edit-profile"
+            body: "*"
+        };
+    }
 }
 
 
@@ -52,4 +58,15 @@ message ResponseGetProfile {
     string email = 6;
     string nameCareer = 7;
     string idCareer = 8;
+}
+
+message RequestEditProfile{
+    string name = 1;
+    string firstLastName = 2;
+    string secondLastName = 3;
+}
+
+message ResponseEditProfile {
+    string status = 1;
+    string message = 2;
 }

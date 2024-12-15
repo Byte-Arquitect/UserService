@@ -71,5 +71,22 @@ namespace User_Service.Src.Controllers
                 throw;
             }
         }
+
+        public override async Task<ResponseEditProfile> EditProfile(
+            RequestEditProfile request,
+            ServerCallContext context
+        )
+        {
+            try
+            {
+                var response = await _userService.EditUserProfile(request, context);
+                return response;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "An error occurred while editing user profile");
+                throw;
+            }
+        }
     }
 }

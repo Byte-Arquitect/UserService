@@ -15,5 +15,9 @@ namespace User_Service.Src.Services.Interfaces
             ServerCallContext context
         );
         public Task<ResponseGetProfile> GetUserProfile(ServerCallContext context);
+        public Task<ResponseEditProfile> EditUserProfile(
+            RequestEditProfile request,
+            ServerCallContext context
+        );
     }
 }
