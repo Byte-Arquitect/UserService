@@ -1,5 +1,5 @@
 
-# 🚀 Proyecto .NET 8 con PostgreSQL y Docker
+# 🚀 Microservicio de gestión de usuarios
 
 Este proyecto utiliza **.NET 8** como framework principal, **PostgreSQL** como base de datos y **Docker** para la creación y gestión de contenedores. A continuación, encontrarás las instrucciones para configurar, ejecutar y entender este proyecto.
 
