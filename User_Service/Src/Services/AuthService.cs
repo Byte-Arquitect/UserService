@@ -93,7 +93,7 @@ namespace User_Service.Src.Services
             var responseContent = await loginApiGateway(request.Email, request.Password);
             var jsonDoc = JsonDocument.Parse(responseContent);
             string token = jsonDoc.RootElement.GetProperty("token").GetString();
-            var response = new ResponseRegister { User = UserResponse, Token = responseContent };
+            var response = new ResponseRegister { User = UserResponse, Token = token };
 
             return response;
         }
