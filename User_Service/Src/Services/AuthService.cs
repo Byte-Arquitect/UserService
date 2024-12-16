@@ -78,7 +78,6 @@ namespace User_Service.Src.Services
             mappedUser.RoleName = "Student";
             var salt = BCrypt.Net.BCrypt.GenerateSalt(12);
             var pass = BCrypt.Net.BCrypt.HashPassword(request.Password, salt);
-            mappedUser.HashedPassword = pass;
 
             var createdUser = await _unitOfWork.UsersRepository.Insert(mappedUser);
             var Email = createdUser.Email;
@@ -90,10 +89,10 @@ namespace User_Service.Src.Services
             var UserResponse = _mapperService.Map<RegisterResponseDto, UserRegisterResponse>(
                 loginUser
             );
-            var responseContent = await loginApiGateway(request.Email, request.Password);
-            var jsonDoc = JsonDocument.Parse(responseContent);
-            string token = jsonDoc.RootElement.GetProperty("token").GetString();
-            var response = new ResponseRegister { User = UserResponse, Token = token };
+            // var responseContent = await loginApiGateway(request.Email, request.Password);
+            // var jsonDoc = JsonDocument.Parse(responseContent);
+            // string token = jsonDoc.RootElement.GetProperty("token").GetString();
+            var response = new ResponseRegister { User = UserResponse, Token = "token" };
 
             return response;
         }

@@ -38,8 +38,7 @@ namespace User_Service.Src.Repositories
                     FirstLastName = "Doe",
                     SecondLastName = "Smith",
                     RUT = "12345678-9",
-                    Email = "jane.doe@example.com",
-                    HashedPassword = "hashed_password_123", // Usa un hash real aquí
+                    Email = "jane.doe@example.com", // Usa un hash real aquí
                     IsEnabled = true,
                     CareerName = "Computer Science",
                     CareerId = "1",
